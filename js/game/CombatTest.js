@@ -86,12 +86,16 @@ CombatTest.prototype.render = function(){
     //this.hitboxes_unfriendly.forEachExists(this.renderGroup, this, 1);
     //this.hitboxes_seek.forEachExists(this.renderGroup, this, 2);
     //pixel.context.drawImage(game.canvas, 0, 0, game.width, game.height, 0, 0, pixel.width, pixel.height);
-    game.debug.text("Debug Info", 10, 10);
-    game.debug.text("Player", 10, 25);
-    game.debug.text('x: ' + Math.round(this.p.x) + ' y: ' + Math.round(this.p.y), 10,40);
-    game.debug.text('xvel: ' + Math.round(this.p.body.velocity.x) + ' yvel: ' + Math.round(this.p.body.velocity.y) + " dir:" + this.p.dir, 10,55);
-    game.debug.text("State: " + this.p.fsm.currentState.name, 10, 70);
-    game.debug.text("Weapon: TBI", 10, 85);
+    var dbg_y = 10;
+    var dbg_yi = 15;
+    
+    game.debug.text("Debug Info", 10, dbg_y);
+    game.debug.text("Player", 10, dbg_y += dbg_yi);
+    game.debug.text('x: ' + Math.round(this.p.x) + ' y: ' + Math.round(this.p.y), 10,dbg_y += dbg_yi);
+    game.debug.text('xvel: ' + Math.round(this.p.body.velocity.x) + ' yvel: ' + Math.round(this.p.body.velocity.y) + " dir:" + this.p.dir, 10,dbg_y += dbg_yi);
+    game.debug.text("State: " + this.p.fsm.currentState.name, 10, dbg_y += dbg_yi);
+    game.debug.text("Weapon: TBI", 10, dbg_y += dbg_yi);
+    game.debug.text("Dash cd" + this.p.dash_cooldown_count, 10, dbg_y += dbg_yi);
 };
 
 CombatTest.prototype.debug = function(){
