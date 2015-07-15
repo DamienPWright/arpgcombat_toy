@@ -12,6 +12,7 @@ function Actor(X, Y, key, HP){
     this.interruptCounter = 0;
     this.interrupted = false;
     
+    this.fsm = new FiniteStateMachine();
 }
 
 Actor.prototype = Object.create(Phaser.Sprite.prototype);

@@ -1,6 +1,5 @@
 function Enemy(X, Y, key){
     Actor.call(this, X, Y, key);
-    this.fsm = new FiniteStateMachine();
     //=====
     //States
     //=====

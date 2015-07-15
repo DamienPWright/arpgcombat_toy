@@ -6,10 +6,13 @@ function Player(X, Y){
     this.body.collideWorldBounds = true;
     //this.body.drag = new Phaser.Point(200,200);
     this.body.maxVelocity = new Phaser.Point(250, 250);
+    this.movespeed_mod = 1.0;
     this.body.mass = 100;
     this.gamestate = game.state.getCurrentState();
     
     this.dir = 0; // 0 for left, 1 for right.
+    this.abs_velocity = 0;
+    this.abs_maxvelocity = 250;
     this.accel_rate = 50;
     this.decel_rate = 100;
     
@@ -35,6 +38,63 @@ function Player(X, Y){
     this.animations.add('run_right', [0, 1, 0, 2], 10, true);
     this.animations.add('jump_left', [5], 10, true);
     this.animations.add('jump_right', [2], 10, true);
+    
+    
+    
+    //=====
+    //States
+    //=====
+    //Idle state
+    this.state_Idle = new ActorState(this);
+    this.state_Idle.name = "Idle";
+    this.state_Idle.onEnter = function(){
+        //
+    };
+    this.state_Idle.onExit = function(){
+    };
+    this.state_Idle.update = function(){
+        //this.fsm.changeState(this.actor.state_Persue);
+    };
+    
+    //Dash state
+    this.state_Dash = new ActorState(this);
+    this.state_Dash.name = "Dash";
+    this.state_Dash.onEnter = function(){
+        //
+    };
+    this.state_Dash.onExit = function(){
+    };
+    this.state_Dash.update = function(){
+        //this.fsm.changeState(this.actor.state_Persue);
+    };
+    
+    //Guard state
+    this.state_Guard = new ActorState(this);
+    this.state_Guard.name = "Guard";
+    this.state_Guard.onEnter = function(){
+        //
+    };
+    this.state_Guard.onExit = function(){
+    };
+    this.state_Guard.update = function(){
+        //this.fsm.changeState(this.actor.state_Persue);
+    };
+    
+    //Attack state
+    this.state_Attack = new ActorState(this);
+    this.state_Guard.name = "Attack";
+    this.state_Attack.onEnter = function(){
+        //Set the movement modifier. 
+        actor.movespeed_mod = 0;
+    };
+    this.state_Guard.onExit = function(){
+        actor.movespeed_mod = 1.0;
+    };
+    this.state_Guard.update = function(){
+        //this.fsm.changeState(this.actor.state_Persue);
+    };
+    
+    this.fsm.changeState(this.state_Idle);
 }
 
 Player.prototype = Object.create(Actor.prototype);
@@ -123,9 +183,20 @@ Player.prototype.processControls = function(){
 	}
 	
 	if(this.Akey.isDown || this.Dkey.isDown || this.Skey.isDown || this.Wkey.isDown){
+	    this.abs_velocity += this.accel_rate;
+	    if(this.abs_velocity > this.abs_maxvelocity){
+	        this.abs_velocity = this.abs_maxvelocity;
+	    }
 	    this.dir_angle = this.dir * Math.PI;
-    	this.body.velocity.x += this.accel_rate * Math.cos(this.dir_angle);
-    	this.body.velocity.y += this.accel_rate * Math.sin(this.dir_angle);
+    	this.body.velocity.x = this.abs_velocity * Math.cos(this.dir_angle) * this.movespeed_mod;
+    	this.body.velocity.y = this.abs_velocity * Math.sin(this.dir_angle) * this.movespeed_mod;
+	}else{
+	    if(this.abs_velocity > 0){
+	        this.abs_velocity -= this.decel_rate;
+	        if(this.abs_velocity < this.decel_rate){
+	            this.abs_velocity = 0;
+	        }
+	    }
 	}
 	
 	if(this.Akey.isDown || this.Dkey.isDown){
@@ -133,10 +204,10 @@ Player.prototype.processControls = function(){
 	}else{
 	    //this.body.drag.x = 1600;
 	    if(this.body.velocity.x > 0){
-	        this.body.velocity.x -= this.accel_rate;
+	        this.body.velocity.x -= this.decel_rate;
 	    }
 	    if(this.body.velocity.x < 0){
-	        this.body.velocity.x += this.accel_rate;
+	        this.body.velocity.x += this.decel_rate;
 	    }
 	    
 	    //make sure resting speed is 0
@@ -152,10 +223,10 @@ Player.prototype.processControls = function(){
 	    //this.body.drag.y = 1600;
 	   
 	    if(this.body.velocity.y > 0){
-	        this.body.velocity.y -= this.accel_rate;;
+	        this.body.velocity.y -= this.decel_rate;
 	    }
 	    if(this.body.velocity.y < 0){
-	        this.body.velocity.y += this.accel_rate;
+	        this.body.velocity.y += this.decel_rate;
 	    }
     	
         //make sure resting speed is 0
