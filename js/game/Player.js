@@ -82,6 +82,7 @@ function Player(X, Y){
         this.actor.movedir_lock = true;
         this.actor.abs_maxvelocity = this.actor.dash_velocity;
         this.actor.dir_angle = this.actor.dir * Math.PI;
+        this.actor.abs_velocity = this.actor.abs_maxvelocity;
         this.actor.body.velocity.x = this.actor.dash_velocity * Math.cos(this.actor.dir_angle) * this.actor.movespeed_mod;
         this.actor.body.velocity.y = this.actor.dash_velocity * Math.sin(this.actor.dir_angle) * this.actor.movespeed_mod;
     };
