@@ -15,6 +15,10 @@ TitleScreen.prototype.preload = function(){
      game.load.image('title_select', 'assets/img/ui/titleselector.png');
      
      game.load.spritesheet('playerchar', 'assets/img/sprites/player.png', 18, 14);
+     game.load.spritesheet('test_01','assets/img/sprites/testsprite_01.png', 42, 64);
+     game.load.spritesheet('test_02','assets/img/sprites/testsprite_02.png', 42, 64); 
+     game.load.spritesheet('test_03','assets/img/sprites/testsprite_03.png', 42, 64); 
+     game.load.spritesheet('invisible','assets/img/sprites/invisible.png', 27, 55); 
       //game.load.spritesheet('goal', 'assets/img/sprites/goal.png', 32, 24);
 }
 

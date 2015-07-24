@@ -20,6 +20,10 @@ function CombatTest(){
     
     //hud
     this.hud;
+    
+    //other stuff
+    this.ptrMouseX = 0;
+    this.ptrMouseY = 0;
 }
 
 CombatTest.prototype.preload = function() {
@@ -31,7 +35,7 @@ CombatTest.prototype.preload = function() {
 CombatTest.prototype.create = function() {
     
    //scoreText = game.add.text(16, 16, 'Level 1', {fontSize: '32px', fill: '#FFF'});
-  
+    game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
    
    //Physics
    game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -52,6 +56,10 @@ CombatTest.prototype.create = function() {
    this.p = player;
    game.camera.follow(player, Phaser.Camera.FOLLOW_PLATFORMER);
    
+   //mouse context
+   game.input.mouse.mouseDownCallback = this.p.onMouseDown;
+   game.input.mouse.mouseUpCallback = this.p.onMouseUp;
+   game.input.mouse.callbackContext = this.p;
    //load objects from the map
    //this.createObjectsFromMap();
    
@@ -60,14 +68,10 @@ CombatTest.prototype.create = function() {
    
    
     //controls
-    this.cursors = game.input.keyboard.createCursorKeys();
-    this.wKey = game.input.keyboard.addKey(32);
-    this.aKey = game.input.keyboard.addKey(32);
-    this.sKey = game.input.keyboard.addKey(32);
-    this.dKey = game.input.keyboard.addKey(32);
     this.spaceBar =  game.input.keyboard.addKey(32);
     
     //this.hud = new HUD();
+    game.input.addMoveCallback(this.updateMousePos, this);
 };
 
 CombatTest.prototype.update = function() {
@@ -89,13 +93,22 @@ CombatTest.prototype.render = function(){
     var dbg_y = 10;
     var dbg_yi = 15;
     
+    var dbg_input_y = 10;
+    var dbg_input_yi = 15;
+    var dbg_input_x = 300;
+    
     game.debug.text("Debug Info", 10, dbg_y);
     game.debug.text("Player", 10, dbg_y += dbg_yi);
     game.debug.text('x: ' + Math.round(this.p.x) + ' y: ' + Math.round(this.p.y), 10,dbg_y += dbg_yi);
     game.debug.text('xvel: ' + Math.round(this.p.body.velocity.x) + ' yvel: ' + Math.round(this.p.body.velocity.y) + " dir:" + this.p.dir, 10,dbg_y += dbg_yi);
-    game.debug.text("State: " + this.p.fsm.currentState.name, 10, dbg_y += dbg_yi);
     game.debug.text("Weapon: TBI", 10, dbg_y += dbg_yi);
-    game.debug.text("Dash cd" + this.p.dash_cooldown_count, 10, dbg_y += dbg_yi);
+    
+    game.debug.text("ms_x: " + this.ptrMouseX + " ms_y: " + this.ptrMouseY, dbg_input_x, dbg_input_y += dbg_input_yi);
+    game.debug.text("ms_L: " + this.p.mouseLeft + " ms_R: " + this.p.mouseRight, dbg_input_x, dbg_input_y += dbg_input_yi);
+    game.debug.text("ms_plr_msdir: " + this.p.playerToMousepointerDir, dbg_input_x, dbg_input_y += dbg_input_yi);
+    game.debug.text("ms_plr_animdir: " + this.p.playerAnimDir, dbg_input_x, dbg_input_y += dbg_input_yi);
+    game.debug.text("State: " + this.p.fsm.currentState.name, dbg_input_x, dbg_input_y += dbg_input_yi);
+    game.debug.text("Dash cd" + this.p.dash_cooldown_count, dbg_input_x, dbg_input_y += dbg_input_yi);
 };
 
 CombatTest.prototype.debug = function(){
@@ -176,5 +189,10 @@ CombatTest.prototype.incrementScore = function(pts){
     if(pts){
         this.hud.updateScore(pts);
     }
+}
+
+CombatTest.prototype.updateMousePos = function(ptr, ix, iy, obj){
+    this.ptrMouseX = ix;
+    this.ptrMouseY = iy;
 }
 

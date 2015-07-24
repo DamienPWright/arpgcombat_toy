@@ -1,6 +1,7 @@
-function Item(X, Y, key){
-    Phaser.Sprite.call(this, game, X, Y, key);
+function Item(equiptype){
+    if(equiptype){
+        this.equiptype = equiptype
+    }else{
+        this.equiptype = EQUIPTYPE_NOEQUIP;
+    }
 }
-
-Item.prototype = Object.create(Phaser.Sprite.prototype);
-Item.prototype.constructor = Actor;

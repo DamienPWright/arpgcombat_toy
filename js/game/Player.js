@@ -1,5 +1,5 @@
 function Player(X, Y){
-    Actor.call(this, X, Y, 'playerchar');
+    Actor.call(this, X, Y, 'invisible');
     game.physics.arcade.enable(this);
     this.body.bounce.y = 0;
     this.body.linearDamping = 1;
@@ -16,11 +16,30 @@ function Player(X, Y){
     this.accel_rate = 50;
     this.decel_rate = 100;
     
+    //lifestats
+    this.hp = 0;
+    this.maxhp = 0;
+    this.attack = 0;
+    this.defense = 0;
+    this.stability = 0;
+    
+    this.resist_all = 0;
+    this.resist_slash = 0;
+    this.resist_blunt = 0;
+    this.resist_pierce = 0;
+    this.resist_range = 0;
+    this.resist_fire = 0;
+    this.resist_ice = 0;
+    this.resist_light = 0;
+    this.resist_dark = 0;
+    
     //Times in frames
     this.dash_cooldown_count = 0;
-    this.dash_cooldown = 30;
+    this.DEF_DASH_CD = 30;
+    this.dash_cooldown = this.DEF_DASH_CD;
     this.dash_time_count = 0;
-    this.dash_time = 15;
+    this.DEF_DASH_TIME = 15;
+    this.dash_time = this.DEF_DASH_TIME;
     this.dash_invuln_count = 0;
     this.dash_invuln_time = 10;
     this.dash_invuln_start = 5;
@@ -28,9 +47,16 @@ function Player(X, Y){
     this.dash_velocity = 750;
     this.movedir_lock = false;
     
+    this.DEF_ATTACK_COOLDOWN = 20;
+    this.attack_cooldown = this.DEF_ATTACK_COOLDOWN;
+    this.attack_cooldown_count = 0;
+    this.DEF_ATTACK_TIME = 20;
+    this.attack_time = this.DEF_ATTACK_TIME;
+    this.attack_time_count = 0;
+    
+    
     this.gamestate = game.state.getCurrentState();
     
-    this.attackBox = {w: 16, h: 16};
     this.attackTimer;
     
     game.input.keyboard.addKey(32).onDown.add(function(){this.attack()}, this);
@@ -41,6 +67,9 @@ function Player(X, Y){
     this.Skey = game.input.keyboard.addKey(83);
     this.Dkey = game.input.keyboard.addKey(68);
     this.DashKey = game.input.keyboard.addKey(16);
+    this.mouseLeft = false;
+    this.mouseRight = false;
+    this.playerToMousepointerDir = 0;
 
     this.animations.add('idle_left', [3], 10, true);
     this.animations.add('idle_right', [0], 10, true);
@@ -48,6 +77,14 @@ function Player(X, Y){
     this.animations.add('run_right', [0, 1, 0, 2], 10, true);
     this.animations.add('jump_left', [5], 10, true);
     this.animations.add('jump_right', [2], 10, true);
+    
+    //graphics
+    this.spr_head = game.add.sprite(0, 0, 'test_03');
+    this.spr_body = game.add.sprite(0, 0, 'test_02');
+    this.spr_legs = game.add.sprite(0, 0, 'test_01');
+    this.addChild(this.spr_legs);
+    this.addChild(this.spr_body);
+    this.addChild(this.spr_head);
     
     //=====
     //States
@@ -61,18 +98,19 @@ function Player(X, Y){
     this.state_Idle.onExit = function(){
     };
     this.state_Idle.update = function(){
-        //this.fsm.changeState(this.actor.state_Persue);
         if(this.actor.DashKey.isDown && this.actor.dash_cooldown_count <= 0){
             this.fsm.changeState(this.actor.state_Dash);
-        }
+        };
+        
         /* 
         if(this.GuardKey.isDown && this.guard_cooldown_count <= 0){
             this.fsm.changeState(this.actor.state_Guard);
         }
-        if(this.AttackKey.isDown && this.attack_cooldown_count <= 0){
+        */
+        if(this.actor.mouseLeft && this.actor.attack_cooldown_count <= 0){
             this.fsm.changeState(this.actor.state_Attack);
         }
-        */
+        
     };
     
     //Dash state
@@ -123,16 +161,22 @@ function Player(X, Y){
     
     //Attack state
     this.state_Attack = new ActorState(this);
-    this.state_Guard.name = "Attack";
+    this.state_Attack.name = "Attack";
     this.state_Attack.onEnter = function(){
         //Set the movement modifier. 
-        actor.movespeed_mod = 0;
+        this.actor.attack_time_count = this.actor.attack_time;
+        this.actor.movespeed_mod = 0.5;
     };
-    this.state_Guard.onExit = function(){
-        actor.movespeed_mod = 1.0;
+    this.state_Attack.onExit = function(){
+        this.actor.movespeed_mod = 1.0;
+        this.actor.attack_cooldown_count = this.actor.attack_cooldown;
+        this.attack_time_count = 0;
     };
-    this.state_Guard.update = function(){
-        //this.fsm.changeState(this.actor.state_Persue);
+    this.state_Attack.update = function(){
+        this.actor.attack_time_count--;
+        if(this.actor.attack_time_count <= 0){
+            this.fsm.changeState(this.actor.state_Idle);
+        }
     };
     
     this.fsm.changeState(this.state_Idle);
@@ -152,11 +196,16 @@ Player.prototype.update = function(){
     this.fsm.update();
     this.manageCooldowns();
     this.animations.play(this.updateAnimation());
+    this.calculatePlayerToPointerAngle();
 };
 
 Player.prototype.manageCooldowns = function(){
     if(this.dash_cooldown_count > 0){
         this.dash_cooldown_count--;
+    }
+    if(this.attack_cooldown_count > 0){
+        console.log(this.attack_cooldown_count);
+        this.attack_cooldown_count--;
     }
 }
 
@@ -304,4 +353,59 @@ Player.prototype.attack = function(evt){
 
 Player.prototype.onDeath = function(){
     game.state.start('gameover');
+}
+
+Player.prototype.onMouseDown = function(evt){
+    switch(evt.button){
+        case 0:
+            this.mouseLeft = true;
+            break;
+        case 2:
+            this.mouseRight = true;
+            break;
+        default:
+            console.log("Not recognised: " + evt.button);
+    }
+}
+
+Player.prototype.onMouseUp= function(evt){
+    switch(evt.button){
+        case 0:
+            this.mouseLeft = false;
+            break;
+        case 2:
+            this.mouseRight = false;
+            break;
+        default:
+            console.log("Not recognised: " + evt.button);
+    }
+}
+
+Player.prototype.calculatePlayerToPointerAngle = function(){
+    var ms_x = game.input.mousePointer.x;
+    var ms_y = game.input.mousePointer.y;
+    var adir = 0;
+    var ptrdir = 0;
+    
+    ptrdir = this.playerToMousepointerDir = Math.atan2(ms_y - this.y, ms_x - this.x) / Math.PI;
+    
+    if(ptrdir < 0.125 && ptrdir > -0.125){
+        adir = 0;
+    }else if(ptrdir >= 0.125 && ptrdir < 0.375){
+        adir = 0.25;
+    }else if(ptrdir >= 0.375 && ptrdir < 0.625){
+        adir = 0.5;
+    }else if(ptrdir >= 0.625 && ptrdir < 0.875){
+        adir = 0.75;
+    }else if((ptrdir >= 0.875 && ptrdir <= 1) || (ptrdir < -0.875 && ptrdir >= -1)){
+        adir = 1.0;
+    }else if(ptrdir <= -0.625 && ptrdir > -0.875){
+        adir = 1.25;
+    }else if(ptrdir <= -0.375 && ptrdir > -0.625){
+        adir = 1.5;
+    }else if(ptrdir <= -0.125 && ptrdir > -0.375){
+        adir = 1.75;
+    }
+    
+    this.playerAnimDir = adir;
 }
