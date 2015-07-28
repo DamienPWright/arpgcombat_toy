@@ -47,12 +47,19 @@ function Player(X, Y){
     this.dash_velocity = 750;
     this.movedir_lock = false;
     
-    this.DEF_ATTACK_COOLDOWN = 20;
+    this.DEF_ATTACK_COOLDOWN = 0;
     this.attack_cooldown = this.DEF_ATTACK_COOLDOWN;
     this.attack_cooldown_count = 0;
     this.DEF_ATTACK_TIME = 20;
     this.attack_time = this.DEF_ATTACK_TIME;
     this.attack_time_count = 0;
+    
+    this.DEF_ATK_COMBO_TIME = 20;
+    this.attack_combo_time = this.DEF_ATK_COMBO_TIME;
+    this.attack_combo_count = 0;
+    this.attack_combo = 0;
+    this.DEF_ATK_COMBO_MAX = 3;
+    this.attack_combo_max = this.DEF_ATK_COMBO_MAX;
     
     
     this.gamestate = game.state.getCurrentState();
@@ -163,7 +170,11 @@ function Player(X, Y){
     this.state_Attack = new ActorState(this);
     this.state_Attack.name = "Attack";
     this.state_Attack.onEnter = function(){
-        //Set the movement modifier. 
+        this.actor.attack_combo_count = this.actor.attack_combo_time + this.actor.attack_time;
+        this.actor.attack_combo++;
+        if(this.actor.attack_combo > this.actor.attack_combo_max){
+            this.actor.attack_combo = 1;
+        }
         this.actor.attack_time_count = this.actor.attack_time;
         this.actor.movespeed_mod = 0.5;
     };
@@ -206,6 +217,12 @@ Player.prototype.manageCooldowns = function(){
     if(this.attack_cooldown_count > 0){
         console.log(this.attack_cooldown_count);
         this.attack_cooldown_count--;
+    }
+    if(this.attack_combo_count > 0){
+        this.attack_combo_count--;
+    }
+    if(this.attack_combo_count <= 0){
+        this.attack_combo = 0;
     }
 }
 

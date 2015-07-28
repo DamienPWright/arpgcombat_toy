@@ -109,6 +109,7 @@ CombatTest.prototype.render = function(){
     game.debug.text("ms_plr_animdir: " + this.p.playerAnimDir, dbg_input_x, dbg_input_y += dbg_input_yi);
     game.debug.text("State: " + this.p.fsm.currentState.name, dbg_input_x, dbg_input_y += dbg_input_yi);
     game.debug.text("Dash cd" + this.p.dash_cooldown_count, dbg_input_x, dbg_input_y += dbg_input_yi);
+    game.debug.text("CmbCnt: " + this.p.attack_combo_count + " Cmb: " + this.p.attack_combo, dbg_input_x, dbg_input_y += dbg_input_yi);
 };
 
 CombatTest.prototype.debug = function(){
